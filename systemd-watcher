@@ -1,0 +1,99 @@
+#!/bin/bash
+###
+#
+# Author: Snax44
+# Date: 2023.08.20
+# Desc:
+#   - Watch health of services defined in SERVICE_LIST 
+#   - Send notifications for every changing state (up -> down / down -> up)
+#     - Over Gotify
+#     - Maybe more in the future
+#
+# License: GPLv3
+###
+
+SERVICE_LIST="ssh nftables" # Space separated list
+CHECK_INTERVAL="5" # Seconds
+
+GOTIFY_ENABLE=true
+GOTIFY_SRV="https://gotify.example.com"
+GOTIFY_TOKEN="<Gotify_APP_Token>"
+GOTIFY_URL="${GOTIFY_SRV}/message?token=${GOTIFY_TOKEN}"
+GOTIFY_PRIORITY="9"
+GOTIFY_TITLE="Systemd Watcher"
+
+########################################################################
+# Do not modify below
+declare -A SERVICE_LIST_CHECKED
+
+function _msg(){
+  if [ "$1" == "ok" ]; then
+    echo -e "[  OK  ] $2"
+  elif [ "$1" == "ko" ]; then
+    echo -e "[ FAIL ] $2"
+  elif [ "$1" == "warn" ]; then
+    echo -e "[ WARN ] $2"
+  elif [ "$1" == "info" ]; then
+    echo -e "[ INFO ] $2"
+  fi
+}
+
+function _check_service_list() {
+
+  for SERVICE in $SERVICE_LIST; do
+    systemctl list-units --all | grep -q ${SERVICE}.service
+    if [[ "$?" -eq "0" ]]; then
+      SERVICE_LIST_CHECKED["${SERVICE}"]="0"
+    else
+      _msg warn "$SERVICE.service: Service not found"
+    fi
+  done
+}
+
+function _check_service_status() {
+  
+  systemctl is-active --quiet $1
+  local CURRENT_STATE="$?"
+  local PREVIOUS_STATE="${SERVICE_LIST_CHECKED[$1]}"
+
+  if [[ "$CURRENT_STATE" -eq "0" ]] && [[ "$PREVIOUS_STATE" == "1" ]]; then
+    _msg info "$1: NOK -> OK"
+    SERVICE_LIST_CHECKED[$1]="0"
+    _send_alert $1 "up"
+  elif [[ "$CURRENT_STATE" -ne "0" ]] && [[ "$PREVIOUS_STATE" == "0" ]]; then
+    _msg info "$1: OK -> NOK"
+    SERVICE_LIST_CHECKED[$1]="1"
+    _send_alert $1 "down"
+  fi
+}
+
+function _send_alert() {
+  if [[ "$2" == "up" ]]; then
+    local MESSAGE="$(echo -e '\U0001F7E2') UP: $1"
+  elif [[ "$2" == "down" ]]; then
+    local MESSAGE="$(echo -e '\U0001F534') DOWN: $1"
+  fi
+  
+  local MESSAGE_FOOTER="--\n\n$(date +"%a, %d %b %Y - %H:%M")"
+
+
+  if $GOTIFY_ENABLE; then
+    curl -s -S --connect-timeout 3 --data '{"message": "'"${MESSAGE}"'\n\n'"${MESSAGE_FOOTER}"'", "title": "'"${GOTIFY_TITLE}"'", "priority":'"${GOTIFY_PRIORITY}"', "extras": {"client::display": {"contentType": "text/markdown"}}}' -H 'Content-Type: application/json' "${GOTIFY_URL}" > /dev/null 
+    if [[ "$?" -eq 0 ]]; then
+      _msg info "Alert successfully sent to $GOTIFY_SRV"
+    else
+      _msg ko "Error during sending alert to $GOTIFY_SRV"
+    fi
+  fi
+}
+
+
+_check_service_list
+_msg info "Services going to be watched: $(echo ${!SERVICE_LIST_CHECKED[@]})"
+
+while true; do
+  for SERVICE in ${!SERVICE_LIST_CHECKED[@]}; do
+    _check_service_status $SERVICE
+  done
+  sleep $CHECK_INTERVAL
+done
