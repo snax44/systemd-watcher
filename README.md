@@ -15,3 +15,7 @@ cp systemd-watcher.service /lib/systemd/system/
 systemctl daemon-reload
 systemctl enable --now systemd-watcher
 ```
+
+## ScreenShot
+
+![1](./screenshot/gotify.png)
