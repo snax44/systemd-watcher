@@ -9,12 +9,15 @@
 
 ```
 git clone https://gitlab.com/snax44/systemd-watcher.git
-cp systemd-watcher/systemd-watcher /usr/bin/
+cd systemd-watcher
+cp systemd-watcher /usr/bin/
 chmod 750 /usr/bin/systemd-watcher
 cp systemd-watcher.service /lib/systemd/system/ 
 systemctl daemon-reload
 systemctl enable --now systemd-watcher
 ```
+
+Do not forget to modify the variables at the beginning of the script /usr/bin/systemd-watcher
 
 ## ScreenShot
 
