@@ -9,7 +9,7 @@
 
 ```
 git clone https://gitlab.com/snax44/systemd-watcher.git
-cp systemd-watcher /usr/bin/
+cp systemd-watcher/systemd-watcher /usr/bin/
 chmod 750 /usr/bin/systemd-watcher
 cp systemd-watcher.service /lib/systemd/system/ 
 systemctl daemon-reload
