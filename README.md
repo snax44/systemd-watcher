@@ -12,7 +12,6 @@ git clone https://gitlab.com/snax44/systemd-watcher.git
 cp systemd-watcher /usr/bin/
 chmod 750 /usr/bin/systemd-watcher
 cp systemd-watcher.service /lib/systemd/system/ 
-Reload systemctl
 systemctl daemon-reload
 systemctl enable --now systemd-watcher
 ```
