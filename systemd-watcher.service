@@ -1,0 +1,8 @@
+[Unit]
+Description=Systemd-Watcher
+
+[Service]
+ExecStart=/usr/bin/systemd-watcher
+
+[Install]
+WantedBy=multi-user.target
