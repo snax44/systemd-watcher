@@ -18,7 +18,13 @@ systemctl enable --now systemd-watcher
 cd .. && rm -rf systemd-watcher
 ```
 
-Do not forget to modify the variables at the beginning of the script /usr/local/bin/systemd-watcher
+Do not forget to modify the variables at the beginning of the script `/usr/local/bin/systemd-watcher`
+
+## Get the logs
+
+```bash
+journalctl -u systemd-watcher
+```
 
 ## ScreenShot
 
