@@ -10,15 +10,20 @@
 ```
 git clone https://gitlab.com/snax44/systemd-watcher.git
 cd systemd-watcher
-cp systemd-watcher /usr/bin/
-chmod 750 /usr/bin/systemd-watcher
+cp systemd-watcher /usr/local/bin/
+chmod 750 /usr/local/bin/systemd-watcher
 cp systemd-watcher.service /lib/systemd/system/ 
 systemctl daemon-reload
 systemctl enable --now systemd-watcher
+cd .. && rm -rf systemd-watcher
 ```
 
-Do not forget to modify the variables at the beginning of the script /usr/bin/systemd-watcher
+Do not forget to modify the variables at the beginning of the script /usr/local/bin/systemd-watcher
 
 ## ScreenShot
 
 ![1](./screenshot/gotify.png)
+
+# Todo:
+
+- Make the script retrying to send the alert in case the previous attempt failed and service is still in the same state.   
