@@ -2,6 +2,9 @@
 Description=Systemd-Watcher
 
 [Service]
+Type=simple
+Restart=always
+RestartSec=1
 ExecStart=/usr/local/bin/systemd-watcher
 
 [Install]
